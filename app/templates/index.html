@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+ <script>
+ 	var socket;
+	var interval = 1;
+	var timeOutId;
+	console.log('http://' + document.domain + ':' + location.port);
+	window.addEventListener("load", function(){
+	    document.querySelector("#seconds").value = interval;
+	    console.log("window ready!!");
+	    //connect to the socket server.
+	    socket = io.connect('http://' + document.domain + ':' + location.port);
+	    socket.on('my response', (msg)=>{
+	    	console.log(`recieved response :${JSON.stringify(msg)}`);
+	    	document.querySelector("#currentTime").innerHTML = msg.data;
+	    	timeOutId = setTimeout(()=>{
+	    		socket.emit('updateTime', {data: 'recieved latest!'})
+	    		}, interval*1000)
+	    	
+	    	})
+	    document.querySelector("#seconds").addEventListener('change', (e)=>{
+	    	console.log('interval changed');
+	    	interval = e.target.value;
+	    	clearTimeout(timeOutId);
+	    	console.log('clear timeout');
+	    	timeOutId = setTimeout(()=>{
+	    		socket.emit('updateTime', {data: 'recieved latest!'})
+	    		}, interval*1000);
+	    
+	    })
+	  });
+	</script>
+</head>
+<body>
+	<h2>Current Time</h2>
+	<div id="currentTime">
+	</div>
+	<h4>Update every</h4>
+	<div><input type="number" min=1 max=60 style="width:fit-content" id="seconds"/><span>sec</span></div>
+	
+</body>
+
